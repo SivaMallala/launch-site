@@ -1,0 +1,448 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Website Launch - 3D Premium + Stars</title>
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.4/dist/confetti.browser.min.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Poppins', sans-serif;
+    }
+    
+    body {
+      height: 100vh;
+      background: linear-gradient(135deg, #0f2027, #203a43, #2c5364);
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      position: relative;
+      perspective: 1000px;
+      transition: transform 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    }
+    
+    body.active { 
+      transform: scale(1.03) translateY(-15px) rotateX(2deg); 
+    }
+
+    .container {
+      text-align: center;
+      z-index: 10;
+      position: relative;
+      transform-style: preserve-3d;
+    }
+
+    h1 {
+      font-size: clamp(2.8rem, 9vw, 4.5rem);
+      margin-bottom: 15px;
+      letter-spacing: 4px;
+      background: linear-gradient(45deg, #ffcc00, #ffffff, #ffd700);
+      background-size: 300% 300%;
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      opacity: 0;
+      transform: translateY(40px) rotateX(20deg);
+      animation: shimmer 2.5s infinite alternate, slideIn3D 1.2s 0.3s forwards;
+    }
+
+    @keyframes shimmer {
+      0% { background-position: 0% 50%; }
+      100% { background-position: 300% 50%; }
+    }
+
+    @keyframes slideIn3D {
+      to { 
+        opacity: 1; 
+        transform: translateY(0) rotateX(0deg); 
+      }
+    }
+
+    p {
+      font-size: clamp(1.1rem, 3.5vw, 1.4rem);
+      opacity: 0.85;
+      font-weight: 300;
+      max-width: 550px;
+      margin: 0 auto 30px;
+      transform: translateY(20px);
+      opacity: 0;
+      animation: fadeInUp 1s 0.8s forwards;
+    }
+
+    @keyframes fadeInUp {
+      to { opacity: 0.85; transform: translateY(0); }
+    }
+
+    button {
+      padding: 18px 45px;
+      border: none;
+      border-radius: 50px;
+      background: linear-gradient(145deg, #ffcc00, #ffdd44, #fff275);
+      color: #1a1a1a;
+      font-size: 1.15rem;
+      font-weight: 600;
+      cursor: pointer;
+      box-shadow: 
+        0 12px 40px rgba(255,204,0,0.4),
+        inset 0 2px 4px rgba(255,255,255,0.3);
+      transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+      position: relative;
+      overflow: hidden;
+      transform-style: preserve-3d;
+    }
+
+    button::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -120%;
+      width: 120%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.6), transparent);
+      transition: left 0.6s;
+    }
+
+    button:hover::before { left: 120%; }
+    button:hover {
+      transform: translateY(-5px) scale(1.08) rotateX(5deg);
+      box-shadow: 
+        0 20px 50px rgba(255,204,0,0.6),
+        inset 0 2px 6px rgba(255,255,255,0.4);
+    }
+
+    /* 3D BALLOONS (unchanged) */
+    .balloon-3d {
+      position: absolute;
+      bottom: -250px;
+      width: 100px;
+      height: 140px;
+      transform-style: preserve-3d;
+      opacity: 0;
+      animation: float3D 7s cubic-bezier(0.22, 0.61, 0.36, 1) forwards;
+    }
+
+    .balloon-body {
+      position: absolute;
+      width: 80px;
+      height: 110px;
+      top: 15px;
+      left: 10px;
+      border-radius: 50% 50% 50% 50% / 60% 60% 40% 40%;
+      transform: rotateY(10deg);
+      background: 
+        radial-gradient(circle at 25% 25%, rgba(255,255,255,0.9) 0%, transparent 45%),
+        radial-gradient(circle at 75% 20%, rgba(255,255,255,0.7) 0%, transparent 45%),
+        var(--balloon-gradient);
+      box-shadow: 
+        inset 0 4px 12px rgba(255,255,255,0.4),
+        inset -4px -6px 12px rgba(0,0,0,0.2),
+        0 15px 35px rgba(0,0,0,0.4),
+        0 0 30px rgba(255,255,255,0.2);
+    }
+
+    .balloon-body::before {
+      content: '';
+      position: absolute;
+      width: 100%;
+      height: 30px;
+      bottom: -15px;
+      left: 0;
+      background: rgba(255,255,255,0.8);
+      border-radius: 50%;
+      transform: rotateX(90deg);
+    }
+
+    .balloon-string {
+      position: absolute;
+      width: 4px;
+      height: 90px;
+      background: linear-gradient(to bottom, rgba(255,255,255,0.9), rgba(255,255,255,0.4));
+      top: 125px;
+      left: 50%;
+      transform: translateX(-50%);
+      border-radius: 3px;
+      box-shadow: 0 0 8px rgba(255,255,255,0.3);
+    }
+
+    .balloon-weight {
+      position: absolute;
+      bottom: -12px;
+      left: 47%;
+      width: 12px;
+      height: 12px;
+      background: radial-gradient(circle, #d4af37, #b8860b);
+      border-radius: 50%;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+      animation: swing 2s ease-in-out infinite;
+    }
+
+    @keyframes swing {
+      0%, 100% { transform: translateX(-50%) rotate(-2deg); }
+      50% { transform: translateX(-50%) rotate(2deg); }
+    }
+
+    @keyframes float3D {
+      0% {
+        transform: translateY(0) translateZ(0) rotateX(0deg) rotateY(0deg) rotateZ(0deg) scale(0.6);
+        opacity: 0;
+      }
+      12% {
+        opacity: 1;
+        transform: translateY(-12vh) translateZ(-50px) rotateX(-5deg) rotateY(8deg) rotateZ(-3deg) scale(1);
+      }
+      35% {
+        transform: translateY(-35vh) translateZ(-120px) rotateX(3deg) rotateY(-12deg) rotateZ(8deg) scale(1.08);
+      }
+      65% {
+        transform: translateY(-65vh) translateZ(-80px) rotateX(-2deg) rotateY(5deg) rotateZ(-5deg) scale(0.95);
+      }
+      100% {
+        transform: translateY(-130vh) translateZ(0) rotateX(1deg) rotateY(-3deg) rotateZ(12deg) scale(0.6);
+        opacity: 0;
+      }
+    }
+
+    /* Enhanced Particles */
+    .particle-3d {
+      position: absolute;
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: radial-gradient(circle, #ffcc00, #ff9900);
+      box-shadow: 
+        0 0 20px #ffcc00,
+        inset 0 0 5px rgba(255,255,255,0.8);
+      transform: translateZ(20px);
+      animation: particle3DFloat 5s linear infinite;
+    }
+
+    @keyframes particle3DFloat {
+      0% { 
+        transform: translateY(0) translateZ(20px) rotateY(0deg) scale(1); 
+        opacity: 1; 
+      }
+      100% { 
+        transform: translateY(-90vh) translateZ(-10px) rotateY(720deg) scale(0); 
+        opacity: 0; 
+      }
+    }
+
+    /* ✨ FALLING STARS ✨ */
+    .falling-star {
+      position: absolute;
+      width: 4px;
+      height: 4px;
+      background: #ffffff;
+      border-radius: 50%;
+      box-shadow: 0 0 20px #ffffff, 0 0 40px #ffcc00;
+      animation: fallStar 3s linear infinite;
+    }
+
+    .falling-star::before {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 100px;
+      height: 2px;
+      background: linear-gradient(90deg, transparent, #ffffff, #ffcc00, transparent);
+      transform: translate(-50%, -50%) rotate(45deg);
+      animation: starTrail 3s linear infinite;
+    }
+
+    @keyframes fallStar {
+      0% {
+        transform: translateY(-10vh) translateX(0) rotate(0deg);
+        opacity: 0;
+      }
+      10% {
+        opacity: 1;
+        transform: translateY(10vh) translateX(-5vw) rotate(180deg);
+      }
+      90% {
+        opacity: 1;
+        transform: translateY(90vh) translateX(15vw) rotate(720deg);
+      }
+      100% {
+        opacity: 0;
+        transform: translateY(110vh) translateX(20vw) rotate(900deg);
+      }
+    }
+
+    @keyframes starTrail {
+      0% { width: 0; opacity: 0; }
+      10% { width: 30px; opacity: 1; }
+      90% { width: 100px; opacity: 1; }
+      100% { width: 0; opacity: 0; }
+    }
+
+    /* ✨ TWINKLING STARS ✨ */
+    .twinkle-star {
+      position: absolute;
+      font-size: 20px;
+      color: #ffd700;
+      text-shadow: 
+        0 0 10px currentColor,
+        0 0 20px #ffcc00,
+        0 0 30px #ffffff;
+      animation: twinkleFloat 4s ease-in-out infinite;
+      transform: translateZ(50px);
+    }
+
+    @keyframes twinkleFloat {
+      0% {
+        transform: translateY(0) translateZ(50px) scale(1) rotate(0deg);
+        opacity: 0.3;
+      }
+      20% {
+        opacity: 1;
+        transform: translateY(-5vh) translateZ(70px) scale(1.3) rotate(90deg);
+      }
+      50% {
+        opacity: 0.7;
+        transform: translateY(-20vh) translateZ(40px) scale(0.9) rotate(180deg);
+      }
+      80% {
+        opacity: 1;
+        transform: translateY(-40vh) translateZ(60px) scale(1.2) rotate(270deg);
+      }
+      100% {
+        opacity: 0;
+        transform: translateY(-60vh) translateZ(30px) scale(0.7) rotate(360deg);
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>🎉 WEBSITE LAUNCHED 🎉</h1>
+    <p>Experience the future under the stars. We are live!</p>
+    <button onclick="start3DParty()">🌟 Launch Cosmic Celebration</button>
+  </div>
+
+  <audio id="cheerSound" preload="auto">
+    <source src="data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBhYqFbF1fdJivrJBhNjVgodDbq2EcBj+a2/LDciUFLIHO8tiJNwgZaLvt559NEAxQp+PwtmMcCj+bm/DQ=" type="audio/wav">
+  </audio>
+
+  <script>
+    function start3DParty() {
+      const duration = 6000;
+      document.body.classList.add('active');
+      document.getElementById('cheerSound').play().catch(() => {});
+
+      // Epic 3D Confetti Explosion
+      confetti({
+        particleCount: 150,
+        spread: 90,
+        origin: { y: 0.6 },
+        colors: ['#ffcc00', '#ffffff', '#ffd700', '#ffed4e', '#fff275'],
+        scalar: 1.4,
+        drift: 0.05
+      });
+      
+      setTimeout(() => {
+        confetti({ particleCount: 120, angle: 60, spread: 80, origin: { x: 0.1, y: 0.4 }, drift: 0.2 });
+        confetti({ particleCount: 120, angle: 120, spread: 80, origin: { x: 0.9, y: 0.4 }, drift: -0.2 });
+      }, 600);
+
+      // 3D Balloons (25 total, staggered)
+      let balloonCount = 0;
+      const balloonInt = setInterval(() => {
+        if (balloonCount++ >= 25) clearInterval(balloonInt);
+        create3DBalloon();
+      }, 200);
+
+      // 3D Glowing Particles
+      for (let i = 0; i < 20; i++) {
+        setTimeout(() => create3DParticle(), i * 250);
+      }
+
+      // 🌟 FALLING STARS (15 total)
+      for (let i = 0; i < 15; i++) {
+        setTimeout(() => createFallingStar(), i * 300);
+      }
+
+      // ✨ TWINKLING STARS (12 total)
+      for (let i = 0; i < 12; i++) {
+        setTimeout(() => createTwinkleStar(), i * 400);
+      }
+
+      setTimeout(() => {
+        document.body.style.opacity = '0';
+        document.body.style.transition = 'opacity 0.8s';
+        setTimeout(() => {
+          window.location.href = 'https://irahfarms.com/';
+        }, 800);
+      }, duration);
+    }
+
+    function create3DBalloon() {
+      const balloon = document.createElement('div');
+      balloon.className = 'balloon-3d';
+      
+      const gradients = [
+        'linear-gradient(145deg, #ff6b6b, #ff8e8e, #ffa8a8)',
+        'linear-gradient(145deg, #4ecdc4, #44bdad, #38b69c)',
+        'linear-gradient(145deg, #45b7d1, #4da8c7, #4e9abd)',
+        'linear-gradient(145deg, #f9ca24, #f7b733, #f5a542)',
+        'linear-gradient(145deg, #fd79a8, #fd8fbf, #fd9fd6)',
+        'linear-gradient(145deg, #6c5ce7, #7a6fd9, #897fcb)',
+        'linear-gradient(145deg, #fdcb6e, #ffd370, #ffda77)'
+      ];
+      
+      balloon.innerHTML = `
+        <div class="balloon-body" style="background: ${gradients[Math.floor(Math.random() * gradients.length)]}"></div>
+        <div class="balloon-string"></div>
+        <div class="balloon-weight"></div>
+      `;
+      
+      balloon.style.left = (Math.random() * 85) + 'vw';
+      balloon.style.animationDelay = (Math.random() * 0.8) + 's';
+      balloon.style.animationDuration = (6 + Math.random() * 2) + 's';
+      
+      document.body.appendChild(balloon);
+      setTimeout(() => balloon.remove(), 9000);
+    }
+
+    function create3DParticle() {
+      const particle = document.createElement('div');
+      particle.className = 'particle-3d';
+      particle.style.left = (Math.random() * 100) + 'vw';
+      particle.style.animationDuration = (4 + Math.random() * 3) + 's';
+      particle.style.animationDelay = (Math.random() * 1.5) + 's';
+      document.body.appendChild(particle);
+      setTimeout(() => particle.remove(), 7000);
+    }
+
+    // 🌟 FALLING STARS
+    function createFallingStar() {
+      const star = document.createElement('div');
+      star.className = 'falling-star';
+      star.style.left = (Math.random() * 100) + 'vw';
+      star.style.top = '-5vh';
+      star.style.animationDuration = (2.5 + Math.random() * 1.5) + 's';
+      star.style.animationDelay = (Math.random() * 0.5) + 's';
+      document.body.appendChild(star);
+      setTimeout(() => star.remove(), 4500);
+    }
+
+    // ✨ TWINKLING STARS
+    function createTwinkleStar() {
+      const star = document.createElement('div');
+      star.className = 'twinkle-star';
+      star.innerHTML = '✨';
+      star.style.left = (Math.random() * 95) + 'vw';
+      star.style.top = (Math.random() * 40) + 'vh';
+      star.style.fontSize = (18 + Math.random() * 8) + 'px';
+      star.style.animationDuration = (3.5 + Math.random() * 1.5) + 's';
+      document.body.appendChild(star);
+      setTimeout(() => star.remove(), 5500);
+    }
+  </script>
+</body>
+</html>
